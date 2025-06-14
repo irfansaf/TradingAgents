@@ -6,7 +6,11 @@ from contextlib import contextmanager
 from typing import Annotated
 import os
 import re
+import yfinance as yf
 
+# Hardcoded ticker-to-company mappings for common stocks
+# Note: For tickers not in this mapping, the system will automatically
+# fetch company names from Yahoo Finance as a fallback
 ticker_to_company = {
     "AAPL": "Apple",
     "MSFT": "Microsoft",
@@ -47,6 +51,52 @@ ticker_to_company = {
     "ROKU": "Roku",
     "PINS": "Pinterest",
 }
+
+
+def get_company_name_from_ticker(ticker: str) -> str:
+    """
+    Dynamically fetch company name from Yahoo Finance.
+    Returns the ticker itself if company name cannot be found.
+    """
+    try:
+        yf_ticker = yf.Ticker(ticker)
+        info = yf_ticker.info
+        
+        # Try different name fields in order of preference
+        company_name = (
+            info.get("shortName") or 
+            info.get("longName") or 
+            info.get("displayName") or 
+            ticker
+        )
+        
+        return company_name
+    except Exception as e:
+        print(f"Warning: Could not fetch company name for {ticker}: {e}")
+        return ticker
+
+
+def get_search_terms_for_ticker(ticker: str) -> list:
+    """
+    Get search terms for a ticker, using hardcoded mapping first,
+    then falling back to dynamic fetching from Yahoo Finance.
+    """
+    # First try the hardcoded mapping
+    if ticker in ticker_to_company:
+        company_mapping = ticker_to_company[ticker]
+        if "OR" in company_mapping:
+            search_terms = company_mapping.split(" OR ")
+        else:
+            search_terms = [company_mapping]
+    else:
+        # Fallback to dynamic fetching
+        company_name = get_company_name_from_ticker(ticker)
+        search_terms = [company_name]
+    
+    # Always include the ticker itself
+    search_terms.append(ticker)
+    
+    return search_terms
 
 
 def fetch_top_from_category(
@@ -98,13 +148,7 @@ def fetch_top_from_category(
 
                 # if is company_news, check that the title or the content has the company's name (query) mentioned
                 if "company" in category and query:
-                    search_terms = []
-                    if "OR" in ticker_to_company[query]:
-                        search_terms = ticker_to_company[query].split(" OR ")
-                    else:
-                        search_terms = [ticker_to_company[query]]
-
-                    search_terms.append(query)
+                    search_terms = get_search_terms_for_ticker(query)
 
                     found = False
                     for term in search_terms:
