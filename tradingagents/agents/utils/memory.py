@@ -2,18 +2,32 @@ import chromadb
 from chromadb.config import Settings
 from openai import OpenAI
 import numpy as np
+from tradingagents.dataflows.config import get_config
 
 
 class FinancialSituationMemory:
-    def __init__(self, name):
-        self.client = OpenAI()
+    def __init__(self, name, config=None):
+        if config is None:
+            config = get_config()
+        
+        # Initialize OpenAI client with configuration
+        client_kwargs = {}
+        if config.get("openai_base_url"):
+            client_kwargs["base_url"] = config["openai_base_url"]
+        
+        # Only set api_key if it's explicitly configured
+        # If not set, let OpenAI client use the default OPENAI_API_KEY environment variable
+        if config.get("openai_api_key"):
+            client_kwargs["api_key"] = config["openai_api_key"]
+        self.client = OpenAI(**client_kwargs)
+        self.embedding_model = config.get("embedding_model", "text-embedding-ada-002")
         self.chroma_client = chromadb.Client(Settings(allow_reset=True))
         self.situation_collection = self.chroma_client.create_collection(name=name)
 
     def get_embedding(self, text):
         """Get OpenAI embedding for a text"""
         response = self.client.embeddings.create(
-            model="text-embedding-ada-002", input=text
+            model=self.embedding_model, input=text
         )
         return response.data[0].embedding
 

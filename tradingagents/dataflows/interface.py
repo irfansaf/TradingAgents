@@ -10,6 +10,7 @@ from datetime import datetime
 import json
 import os
 import pandas as pd
+import numpy as np
 from tqdm import tqdm
 import yfinance as yf
 from openai import OpenAI
@@ -702,8 +703,22 @@ def get_YFin_data(
     return filtered_data
 
 
+def _create_openai_client():
+    """Helper function to create OpenAI client with config."""
+    config = get_config()
+    client_kwargs = {}
+    if config.get("openai_base_url"):
+        client_kwargs["base_url"] = config["openai_base_url"]
+    
+    # Only set api_key if it's explicitly configured
+    # If not set, let OpenAI client use the default OPENAI_API_KEY environment variable
+    if config.get("openai_api_key"):
+        client_kwargs["api_key"] = config["openai_api_key"]
+    return OpenAI(**client_kwargs)
+
+
 def get_stock_news_openai(ticker, curr_date):
-    client = OpenAI()
+    client = _create_openai_client()
 
     response = client.responses.create(
         model="gpt-4.1-mini",
@@ -737,7 +752,7 @@ def get_stock_news_openai(ticker, curr_date):
 
 
 def get_global_news_openai(curr_date):
-    client = OpenAI()
+    client = _create_openai_client()
 
     response = client.responses.create(
         model="gpt-4.1-mini",
@@ -771,7 +786,7 @@ def get_global_news_openai(curr_date):
 
 
 def get_fundamentals_openai(ticker, curr_date):
-    client = OpenAI()
+    client = _create_openai_client()
 
     response = client.responses.create(
         model="gpt-4.1-mini",

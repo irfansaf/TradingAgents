@@ -18,6 +18,7 @@ from tradingagents.agents.utils.agent_states import (
     RiskDebateState,
 )
 from tradingagents.dataflows.interface import set_config
+from tradingagents.utils.openai_utils import create_chat_openai
 
 from .conditional_logic import ConditionalLogic
 from .setup import GraphSetup
@@ -55,18 +56,19 @@ class TradingAgentsGraph:
         )
 
         # Initialize LLMs
-        self.deep_thinking_llm = ChatOpenAI(model=self.config["deep_think_llm"])
-        self.quick_thinking_llm = ChatOpenAI(
-            model=self.config["quick_think_llm"], temperature=0.1
+        self.deep_thinking_llm = create_chat_openai(self.config["deep_think_llm"])
+        self.quick_thinking_llm = create_chat_openai(
+            self.config["quick_think_llm"], 
+            temperature=0.1
         )
         self.toolkit = Toolkit(config=self.config)
 
         # Initialize memories
-        self.bull_memory = FinancialSituationMemory("bull_memory")
-        self.bear_memory = FinancialSituationMemory("bear_memory")
-        self.trader_memory = FinancialSituationMemory("trader_memory")
-        self.invest_judge_memory = FinancialSituationMemory("invest_judge_memory")
-        self.risk_manager_memory = FinancialSituationMemory("risk_manager_memory")
+        self.bull_memory = FinancialSituationMemory("bull_memory", self.config)
+        self.bear_memory = FinancialSituationMemory("bear_memory", self.config)
+        self.trader_memory = FinancialSituationMemory("trader_memory", self.config)
+        self.invest_judge_memory = FinancialSituationMemory("invest_judge_memory", self.config)
+        self.risk_manager_memory = FinancialSituationMemory("risk_manager_memory", self.config)
 
         # Create tool nodes
         self.tool_nodes = self._create_tool_nodes()

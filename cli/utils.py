@@ -1,6 +1,7 @@
 import questionary
 from typing import List, Optional, Tuple, Dict
 
+from cli.main import console
 from cli.models import AnalystType
 
 ANALYST_ORDER = [
@@ -127,10 +128,8 @@ def select_shallow_thinking_agent() -> str:
 
     # Define shallow thinking llm engine options with their corresponding model names
     SHALLOW_AGENT_OPTIONS = [
-        ("GPT-4o-mini - Fast and efficient for quick tasks", "gpt-4o-mini"),
-        ("GPT-4.1-nano - Ultra-lightweight model for basic operations", "gpt-4.1-nano"),
-        ("GPT-4.1-mini - Compact model with good performance", "gpt-4.1-mini"),
-        ("GPT-4o - Standard model with solid capabilities", "gpt-4o"),
+        ("Deepseek Chat - Fast and efficient for quick tasks", "deepseek-chat"),
+        ("Deepseek Reasoner - Ultra-lightweight model for basic operations", "deepseek-reasoner"),
     ]
 
     choice = questionary.select(
@@ -163,13 +162,8 @@ def select_deep_thinking_agent() -> str:
 
     # Define deep thinking llm engine options with their corresponding model names
     DEEP_AGENT_OPTIONS = [
-        ("GPT-4.1-nano - Ultra-lightweight model for basic operations", "gpt-4.1-nano"),
-        ("GPT-4.1-mini - Compact model with good performance", "gpt-4.1-mini"),
-        ("GPT-4o - Standard model with solid capabilities", "gpt-4o"),
-        ("o4-mini - Specialized reasoning model (compact)", "o4-mini"),
-        ("o3-mini - Advanced reasoning model (lightweight)", "o3-mini"),
-        ("o3 - Full advanced reasoning model", "o3"),
-        ("o1 - Premier reasoning and problem-solving model", "o1"),
+        ("Deepseek Chat - Fast and efficient for quick tasks", "deepseek-chat"),
+        ("Deepseek Reasoner - Ultra-lightweight model for basic operations", "deepseek-reasoner"),
     ]
 
     choice = questionary.select(
