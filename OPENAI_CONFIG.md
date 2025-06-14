@@ -15,8 +15,15 @@ The following environment variables can be set to customize OpenAI behavior:
 - `OPENAI_QUICK_THINK_MODEL`: Model to use for quick thinking tasks (default: `gpt-4o-mini`)
 - `OPENAI_EMBEDDING_MODEL`: Model to use for embeddings (default: `text-embedding-ada-002`)
 
-### Important Note
-The `OPENAI_API_KEY` environment variable is the standard way that OpenAI clients look for API keys. You must set this environment variable for the system to work. The configuration system will use this automatically, or you can override it by setting it in the configuration.
+### Important Notes
+
+1. **API Key**: The `OPENAI_API_KEY` environment variable is the standard way that OpenAI clients look for API keys. You must set this environment variable for the system to work.
+
+2. **Automatic Embedding Provider Selection**: The system automatically detects your provider and uses the appropriate embedding service:
+   - **OpenAI/Azure**: Uses OpenAI's embedding API (e.g., `text-embedding-ada-002`)
+   - **Other providers** (DeepSeek, etc.): Automatically uses Hugging Face sentence-transformers (e.g., `all-MiniLM-L6-v2`)
+   
+   This ensures backward compatibility - when you switch back to OpenAI, embeddings will automatically use OpenAI's service again.
 
 ## Setup
 
@@ -56,6 +63,17 @@ OPENAI_BASE_URL=https://your-proxy.com/v1
 OPENAI_BASE_URL=https://your-resource.openai.azure.com/
 OPENAI_API_KEY=your_azure_api_key
 ```
+
+### Using DeepSeek
+```bash
+OPENAI_BASE_URL=https://api.deepseek.com/v1
+OPENAI_API_KEY=your_deepseek_api_key
+OPENAI_DEEP_THINK_MODEL=deepseek-reasoner
+OPENAI_QUICK_THINK_MODEL=deepseek-chat
+OPENAI_EMBEDDING_MODEL=all-MiniLM-L6-v2
+```
+
+**Note**: When using DeepSeek, embeddings will automatically use Hugging Face's `all-MiniLM-L6-v2` model since DeepSeek doesn't provide embedding services. The system will download this model on first use.
 
 ## Implementation Details
 
